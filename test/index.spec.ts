@@ -1,0 +1,117 @@
+import chai from "chai";
+import chaiHttp from "chai-http";
+import { server, User } from "../src/server";
+import dotenv from 'dotenv'
+import { verify } from 'jsonwebtoken'
+
+dotenv.config();
+
+interface UserTest extends User {
+  id?: string;
+  name: string;
+  email: string;
+  password: string;
+  token?: string;
+}
+
+const expect = chai.expect;
+const JWT_SECRET: string = process.env.JWT_SECRET || ""
+
+chai.use(chaiHttp);
+
+
+describe("Routes: /api", () => {
+  const user: UserTest = {
+    id: "INVALID-ID",
+    name: "username",
+    email: "input@email.com",
+    password: "password1"
+  };
+
+  after(() => {
+    server.close();
+  });
+
+  it("should create the user", done => {
+    chai
+      .request(server)
+      .post("/api/users")
+      .send({ "email": user.email, "password": user.password })
+      .end((err, res) => {
+        if (err) done(err);
+
+        expect(res.body).to.have.all.keys('id', 'email', 'name');
+        expect(res.body).to.include({ "email": user.email, "name": null });
+
+        user.id = res.body.id;
+
+        done();
+      });
+  });
+
+  it("should authenticate the user", done => {
+    chai
+      .request(server)
+      .post('/api/auth')
+      .set('Authorization', `Basic {${user.name}:${user.password}}`)
+      .send()
+      .end((err, res) => {
+        if (err) done(err);
+
+        expect(res.body).to.have.all.keys('token');
+        expect(verify(res.body.token, JWT_SECRET)).to.be.true;
+
+        user.token = res.body.token;
+      })
+  })
+
+  it("should retrieve a single user", done => {
+    chai
+      .request(server)
+      .get(`/api/users/${user.id}`)
+      .set('Authorization', `Bearer {${user.token}}`)
+      .end((err, res) => {
+        if (err) done(err);
+
+        expect(res.body).to.have.all.keys('id', 'email', 'name');
+        expect(res.body).to.deep.equal({
+          id: user.id,
+          email: user.email,
+          name: user.name
+        })
+      })
+  })
+
+  it("should retrieve all users", done => {
+    chai
+      .request(server)
+      .get(`/api/users`)
+      .set('Authorization', `Bearer {${user.token}}`)
+      .end((err, res) => {
+        if (err) done(err);
+
+        expect(res.body).to.deep.equal([
+          { "id": user.id, "email": user.email, "name": user.name }
+        ])
+      })
+  })
+
+  it("should update own information", done => {
+    chai
+      .request(server)
+      .patch('/api/users')
+      .set('Authorization', `Bearer {${user.token}}`)
+      .send({ "name": "new name", "password": "newpassword" })
+      .end((err, res) => {
+        if (err) done(err);
+
+        expect(res.body).to.have.all.keys('id', 'email', 'name');
+        expect(res.body).to.deep.equal({
+          "id": user.id,
+          "email": user.email,
+          "name": "new name"
+        })
+      })
+
+  })
+});
