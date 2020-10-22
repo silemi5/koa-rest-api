@@ -1,0 +1,13 @@
+version: '3'
+services: 
+  database:
+    image: 'mongo:4.4.1'
+    container_name: 'rest-api-mongo'
+    environment: 
+      - MONGO_INITDB_DATABASE=rest-api-db
+      - MONGO_INITDB_ROOT_USERNAME=silemi5
+      - MONGO_INITDB_ROOT_PASSWORD=ocisly
+    volumes:
+      - ./mongo-volume:/data/db
+    ports:
+      - '27017-27019:27017-27019'

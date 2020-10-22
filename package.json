@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "mocha \"./**/*.spec.ts\"",
-    "lint": "eslint src/*.ts test/*.ts --fix"
+    "lint": "eslint src/*.ts test/*.ts --fix",
+    "docker": "docker-compose up"
   },
   "author": "silemi5",
   "license": "ISC",
