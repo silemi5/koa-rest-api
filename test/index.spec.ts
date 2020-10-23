@@ -1,6 +1,6 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
-import { server } from "../src/server";
+import { app } from "../src/server";
 import dotenv from 'dotenv'
 import { verify } from 'jsonwebtoken'
 
@@ -14,6 +14,7 @@ interface UserTest {
   token?: string;
 }
 
+const server = app.listen()
 const expect = chai.expect;
 const JWT_SECRET: string = process.env.JWT_SECRET || ""
 
