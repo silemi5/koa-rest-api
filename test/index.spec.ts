@@ -1,12 +1,12 @@
 import chai from "chai";
 import chaiHttp from "chai-http";
-import { server, User } from "../src/server";
+import { server } from "../src/server";
 import dotenv from 'dotenv'
 import { verify } from 'jsonwebtoken'
 
 dotenv.config();
 
-interface UserTest extends User {
+interface UserTest {
   id?: string;
   name: string;
   email: string;
