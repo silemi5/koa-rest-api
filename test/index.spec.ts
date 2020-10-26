@@ -77,11 +77,12 @@ describe("Routes: /api", () => {
         if (err) done(err);
 
         expect(res.body).to.have.all.keys('id', 'email', 'name');
-        expect(res.body).to.deep.equal({
+        expect(res.body).to.include({
           id: user.id,
           email: user.email,
-          name: user.name
         })
+
+        done();
       })
   })
 

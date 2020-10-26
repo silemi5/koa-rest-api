@@ -4,7 +4,7 @@ import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 import { User } from './model'
 import bodyParser from 'koa-bodyparser'
-import { sign } from 'jsonwebtoken'
+import { sign, verify } from 'jsonwebtoken'
 
 
 dotenv.config();
@@ -22,6 +22,7 @@ router
   })
   .post('/api/users', createUser)
   .post('/api/auth', authenticateUser)
+  .get('/api/users/:id', getUser)
 
 app.use(bodyParser())
 app.use(router.routes())
@@ -73,6 +74,32 @@ async function authenticateUser(ctx) {
           }, JWT_SECRET)
         }
         ctx.status = 200;
+      }
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+
+}
+
+async function getUser(ctx) {
+  const token = ctx.headers.authorization.replace("Bearer {", "").replace("}", "")
+
+  const decodedPayload = verify(token, JWT_SECRET)
+
+  if (decodedPayload == undefined) { ctx.throw(403); return; }
+
+  const user = await User.findOne({ _id: ctx.params.id })
+    .then((res) => {
+      if (res === null) { // Invalid credentials
+        ctx.throw(401, 'User not found')
+      }
+      else {
+        ctx.body = {
+          "id": res._id,
+          "email": res.email,
+          "name": res.name || null
+        }
       }
     })
     .catch((err) => {
