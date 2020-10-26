@@ -54,15 +54,17 @@ describe("Routes: /api", () => {
     chai
       .request(server)
       .post('/api/auth')
-      .set('Authorization', `Basic {${user.name}:${user.password}}`)
+      .set('Authorization', `Basic {${user.email}:${user.password}}`)
       .send()
       .end((err, res) => {
         if (err) done(err);
 
         expect(res.body).to.have.all.keys('token');
-        expect(verify(res.body.token, JWT_SECRET)).to.be.true;
+        expect(verify(res.body.token, JWT_SECRET)).have.all.keys('id', 'email', 'name', 'iat');
 
         user.token = res.body.token;
+
+        done();
       })
   })
 
