@@ -3,6 +3,7 @@ import chaiHttp from "chai-http";
 import { app } from "../src/server";
 import dotenv from 'dotenv'
 import { verify } from 'jsonwebtoken'
+import mongoose from 'mongoose'
 
 dotenv.config();
 
@@ -22,6 +23,10 @@ chai.use(chaiHttp);
 
 
 describe("Routes: /api", () => {
+  before(() => {
+    mongoose.connection.collections.users.drop();
+  });
+
   const user: UserTest = {
     id: "INVALID-ID",
     name: "username",
@@ -94,9 +99,10 @@ describe("Routes: /api", () => {
       .end((err, res) => {
         if (err) done(err);
 
-        expect(res.body).to.deep.equal([
-          { "id": user.id, "email": user.email, "name": user.name }
-        ])
+        expect(res.body).to.be.an('array')
+        expect(res.body).to.include.members([{ "id": user.id, "email": user.email }])
+
+        done();
       })
   })
 

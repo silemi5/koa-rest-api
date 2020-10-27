@@ -23,6 +23,7 @@ router
   .post('/api/users', createUser)
   .post('/api/auth', authenticateUser)
   .get('/api/users/:id', getUser)
+  .get('/api/users', getAllUsers)
 
 app.use(bodyParser())
 app.use(router.routes())
@@ -100,6 +101,28 @@ async function getUser(ctx) {
           "email": res.email,
           "name": res.name || null
         }
+      }
+    })
+    .catch((err) => {
+      console.log(err)
+    })
+
+}
+
+async function getAllUsers(ctx) {
+  const token = ctx.headers.authorization.replace("Bearer {", "").replace("}", "")
+
+  const decodedPayload = verify(token, JWT_SECRET)
+
+  if (decodedPayload == undefined) { ctx.throw(403); return; }
+
+  await User.find({})
+    .then((res) => {
+      if (res === null) { // Invalid credentials
+        ctx.throw(401, 'User not found')
+      }
+      else {
+        ctx.body = res
       }
     })
     .catch((err) => {
