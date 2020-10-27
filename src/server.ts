@@ -24,6 +24,7 @@ router
   .post('/api/auth', authenticateUser)
   .get('/api/users/:id', getUser)
   .get('/api/users', getAllUsers)
+  .patch('/api/users', updateOwnUser)
 
 app.use(bodyParser())
 app.use(router.routes())
@@ -129,4 +130,46 @@ async function getAllUsers(ctx) {
       console.log(err)
     })
 
+}
+
+async function updateOwnUser(ctx) {
+  const token = ctx.headers.authorization.replace("Bearer {", "").replace("}", "")
+  const decodedPayload = verify(token, JWT_SECRET)
+  const request = ctx.request.body
+
+  if (!decodedPayload) {
+    ctx.throw(403);
+    return;
+  }
+
+  const user = await User.findOne({ _id: decodedPayload.id }).select('password')
+
+  if (user) {
+    user.name = request.name || user.name
+    user.password = request.password || user.password
+    user.save()
+
+
+    ctx.body = {
+      id: user.id,
+      email: user.email,
+      name: user.name
+    }
+  }
+
+  // .then((res) => {
+  //   if (res === null) { // Invalid credentials
+  //     ctx.throw(401, 'User not found')
+  //   }
+  //   else {
+  //     ctx.body = {
+  //       "id": res._id,
+  //       "email": res.email,
+  //       "name": res.name || null
+  //     }
+  //   }
+  // })
+  // .catch((err) => {
+  //   console.log(err)
+  // })
 }
