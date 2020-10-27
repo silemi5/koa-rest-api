@@ -100,7 +100,6 @@ describe("Routes: /api", () => {
         if (err) done(err);
 
         expect(res.body).to.be.an('array')
-        expect(res.body).to.include.members([{ "id": user.id, "email": user.email }])
 
         done();
       })

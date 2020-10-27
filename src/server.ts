@@ -156,20 +156,4 @@ async function updateOwnUser(ctx) {
       name: user.name
     }
   }
-
-  // .then((res) => {
-  //   if (res === null) { // Invalid credentials
-  //     ctx.throw(401, 'User not found')
-  //   }
-  //   else {
-  //     ctx.body = {
-  //       "id": res._id,
-  //       "email": res.email,
-  //       "name": res.name || null
-  //     }
-  //   }
-  // })
-  // .catch((err) => {
-  //   console.log(err)
-  // })
 }
