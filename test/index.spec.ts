@@ -121,6 +121,8 @@ describe("Routes: /api", () => {
           "email": user.email,
           "name": "new name"
         })
+
+        done()
       })
 
   })
